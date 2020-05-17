@@ -20,6 +20,13 @@ let urlDB;
 if (process.env.NODE_ENV === 'dev') {
     urlDB = 'mongodb://localhost:27017/cafe';
 } else {
-    urlDB = 'mongodb+srv://tato:2L-EVuPbzkxuj8H@cluster0-irbp8.mongodb.net/cafe';
+    urlDB = process.env.MONGO_URL;
 }
 process.env.URLDB = urlDB;
+
+/*
+heroku config
+heroku config:set NOMBRE=tato
+heroku config:get NOMBRE
+heroku config:unset NOMBRE
+*/
