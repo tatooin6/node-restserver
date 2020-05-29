@@ -5,10 +5,20 @@ const _ = require('underscore');
 // para crear objetos Usuario
 const Usuario = require('../models/usuario');
 
+// declaracion del middleware
+const { verificaToken, verificaAdminRole } = require('../middlewares/autenticacion');
+
 const app = express();
 
+// el verificaToken es la funcion que se verifica en el middleware no sogue con la siguiente función hasta que tenga un next();
+app.get('/usuario', verificaToken, (req, res) => {
 
-app.get('/usuario', function(req, res) {
+    // en el req viene el usuario del token porque el middleware de autenticacion asi lo devuelve
+    /* return res.json({
+        usuario: req.usuario,
+        nombre: req.usuario.nombre,
+        email: req.usuario.email
+    }) */
 
     let desde = req.query.desde || 0;
     desde = Number(desde);
@@ -43,7 +53,7 @@ app.get('/usuario', function(req, res) {
     //res.json('get usuario')
 });
 
-app.post('/usuario', function(req, res) {
+app.post('/usuario', [verificaToken, verificaAdminRole], function(req, res) {
 
     // body va a ser lo que aparece cuando el parser procece peticiones
     let body = req.body;
@@ -89,7 +99,7 @@ app.post('/usuario', function(req, res) {
 
 });
 
-app.put('/usuario/:id', function(req, res) {
+app.put('/usuario/:id', [verificaToken, verificaAdminRole], function(req, res) {
 
     // el id que se define en el endpoint es el de req.params.id
     let id = req.params.id;
@@ -118,7 +128,7 @@ app.put('/usuario/:id', function(req, res) {
     });
 });
 
-app.delete('/usuario/:id', function(req, res) {
+app.delete('/usuario/:id', [verificaToken, verificaAdminRole], function(req, res) {
 
     let id = req.params.id;
 
