@@ -45,3 +45,9 @@ heroku config:set NOMBRE=tato
 heroku config:get NOMBRE
 heroku config:unset NOMBRE
 */
+
+// ===========================
+// Google Client ID
+// ===========================
+
+process.env.CLIENT_ID = process.env.CLIENT_ID || '1085501733383-7kao18bh03aoaqaaqp1rcuauecijk0fn.apps.googleusercontent.com';
