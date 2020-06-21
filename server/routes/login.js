@@ -87,7 +87,7 @@ app.post('/google', async(req, res) => {
 
     // verificacion de la existencia de ese usuario de google
     let googleUser = await verify(token)
-        .catch(err => {
+        .catch(e => {
             return res.status(403).json({
                 ok: false,
                 err: e
@@ -95,6 +95,78 @@ app.post('/google', async(req, res) => {
         });
 
     // Se verifica si en la BD existe ese usuario
+    Usuario.findOne({ email: googleUser.email }, (err, usuarioDB) => {
+        // Si ocurre algun error
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                err
+            })
+        }
+
+        // Si existe el usuario y fue creado con las credenciales de la aplicación
+        if (usuarioDB) {
+            if (usuarioDB.google === false) {
+                return res.status(400).json({
+                    ok: false,
+                    err: {
+                        message: 'Debe usar su autenticación normal'
+                    }
+                })
+            } else {
+                // si el usuario existe y fue creado con credenciales de google
+                // [crear token personalizado]
+                let token = jwt.sign({
+                    usuario: usuarioDB
+                }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
+
+                return res.json({
+                    ok: true,
+                    usuario: usuarioDB,
+                    token
+                });
+            }
+
+        } else {
+            // si el usuario no existe en nuestra base de datos, crear usuario
+            let usuario = new Usuario();
+            usuario.nombre = googleUser.nombre;
+            usuario.email = googleUser.email;
+            usuario.img = googleUser.img;
+            usuario.google = true;
+            // password es obligatorio pero no lo vamos a usar
+            // no será posible loguearse con este password encriptado
+            usuario.password = ':)';
+
+            // guardado del nuevo usuario de google
+            usuario.save((err, usuarioDB) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        err
+                    })
+                }
+
+                // renovar su token [crear token personalizado]
+                let token = jwt.sign({
+                    usuario: usuarioDB
+                }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
+
+                // respuesta
+                return res.json({
+                    ok: true,
+                    usuario: usuarioDB,
+                    token
+                })
+            });
+
+        }
+
+    })
+
+
+
+    /* // Se verifica si en la BD existe ese usuario
     Usuario.findOne({ email: googleUser.email }, (err, usuarioDB) => {
         // Si ocurre algun error
         if (err) {
@@ -132,7 +204,7 @@ app.post('/google', async(req, res) => {
             usuario.nombre = googleUser.nombre;
             usuario.email = googleUser.email;
             usuario.img = googleUser.img;
-            usuario.google = googleUser.google;
+            usuario.google = true;
             // password es obligatorio pero no lo vamos a usar
             // no será posible loguearse con este password encriptado
             usuario.password = ':)';
@@ -161,7 +233,7 @@ app.post('/google', async(req, res) => {
 
         }
 
-    })
+    }) */
 
     // Enviar como respuesta al usuario encontrado en google
     /* res.json({
