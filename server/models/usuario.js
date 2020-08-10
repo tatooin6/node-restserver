@@ -58,4 +58,4 @@ usuarioSchema.plugin(uniqueValidator, {
 });
 
 // para exportar parametros del modelo es el nombre que queremos que tenga y la configuracion de donde proviene
-module.exports = mongoose.model('usuario', usuarioSchema);
+module.exports = mongoose.model('Usuario', usuarioSchema);
