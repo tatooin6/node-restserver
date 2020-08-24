@@ -51,7 +51,39 @@ let verificaAdminRole = (req, res, next) => {
     }
 }
 
+// ===========================
+// VERIFICAR TOKEN PARA IMAGEN
+// ===========================
+
+let verificaTokenImg = (req, res, next) => {
+
+    let token = req.query.token;
+
+    // función para verificar el token conrrectamente, tiene el token, el SEED y un callback para errores y la info decondificada
+    jwt.verify(token, process.env.SEED, (err, decoded) => {
+
+        if (err) {
+            // 401 unauthorized
+            return res.status(401).json({
+                ok: false,
+                err: {
+                    message: 'Token no válido'
+                }
+            });
+        }
+
+        // decoded tiene la informacion del usuario, es el payload desencriptado
+        // para que si llega hasta esta linea entonces se devuelve el usuario del payload decodificado
+        req.usuario = decoded.usuario;
+
+        next();
+
+    });
+
+}
+
 module.exports = {
     verificaToken,
-    verificaAdminRole
+    verificaAdminRole,
+    verificaTokenImg
 }
